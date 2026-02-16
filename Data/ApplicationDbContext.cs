@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using AnkietyPPK.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using AnkietyPPK.Models;
 
 namespace AnkietyPPK.Data
 {
@@ -19,23 +19,22 @@ namespace AnkietyPPK.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Konfiguracja relacji Survey -> Options (1:N)
+            //konfiguracja relacji Survey -> Options (1:N)
             modelBuilder.Entity<Option>()
                 .HasOne(o => o.Survey)
                 .WithMany(s => s.Options)
                 .HasForeignKey(o => o.SurveyId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Konfiguracja relacji Option -> Votes (1:N)
+            //konfiguracja relacji Option -> Votes (1:N)
             modelBuilder.Entity<Vote>()
                 .HasOne(v => v.Option)
                 .WithMany(o => o.Votes)
                 .HasForeignKey(v => v.OptionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Indeks zapobiegający wielokrotnemu głosowaniu
-            // respondent może zagłosować tylko raz w danej ankiecie
-            // (unikatowość na poziomie logiki kontrolera, tu indeks pomocniczy)
+            //indeks zapobiegający wielokrotnemu głosowaniu
+            //respondent może zagłosować tylko raz w danej ankiecie
             modelBuilder.Entity<Vote>()
                 .HasIndex(v => new { v.OptionId, v.RespondentUserId });
         }

@@ -1,10 +1,10 @@
+using AnkietyPPK.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AnkietyPPK.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Konfiguracja bazy danych 
+//konfiguracja bazy danych 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -34,7 +34,7 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Inicjacja bazy danych i seedowanie ról/użytkowników
+// inicjacja bazy danych i seedowanie ról/użytkowników
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

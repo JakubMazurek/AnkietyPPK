@@ -9,6 +9,10 @@ namespace AnkietyPPK.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
 
+        public UserManager<IdentityUser> UserManager => _userManager;
+
+        public SignInManager<IdentityUser> SignInManager => _signInManager;
+
         public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
             _userManager = userManager;
@@ -33,7 +37,7 @@ namespace AnkietyPPK.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var result = await _signInManager.PasswordSignInAsync(
+            var result = await SignInManager.PasswordSignInAsync(
                 model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
@@ -67,14 +71,14 @@ namespace AnkietyPPK.Controllers
                 EmailConfirmed = true
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await UserManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
                 // Domyślnie nowy użytkownik = Respondent
-                await _userManager.AddToRoleAsync(user, "Respondent");
+                await UserManager.AddToRoleAsync(user, "Respondent");
 
-                await _signInManager.SignInAsync(user, isPersistent: false);
+                await SignInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Index", "Survey");
             }
 
@@ -91,7 +95,7 @@ namespace AnkietyPPK.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await SignInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
     }

@@ -21,11 +21,11 @@ namespace AnkietyPPK.Models
         [Display(Name = "Czy aktywna")]
         public bool IsActive { get; set; } = true;
 
-        // ID ankietera (właściciela ankiety)
+        //id użytkownika, który utworzył ankietę (z Identity)
         [Required]
         public string CreatedByUserId { get; set; } = string.Empty;
 
-        // Relacja 1:N — jedna ankieta ma wiele opcji
+        //relacja 1:N do opcji w ankiecie
         public ICollection<Option> Options { get; set; } = new List<Option>();
     }
 }

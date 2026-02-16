@@ -6,13 +6,13 @@ namespace AnkietyPPK.Models
     {
         public int Id { get; set; }
 
-        // Klucz obcy do opcji
+        //klucz obcy do opcji, na którą oddano głos
         public int OptionId { get; set; }
 
-        // Nawigacja do opcji
+        //nawigacja do opcji
         public Option Option { get; set; } = null!;
 
-        // ID respondenta (użytkownika głosującego)
+        //id użytkownika, który oddał głos (z Identity)
         [Required]
         public string RespondentUserId { get; set; } = string.Empty;
 

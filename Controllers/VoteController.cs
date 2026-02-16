@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AnkietyPPK.Data;
+using AnkietyPPK.Models;
+using AnkietyPPK.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AnkietyPPK.Data;
-using AnkietyPPK.Models;
-using AnkietyPPK.Models.ViewModels;
 
 namespace AnkietyPPK.Controllers
 {
@@ -20,10 +20,14 @@ namespace AnkietyPPK.Controllers
             _userManager = userManager;
         }
 
-        // GET: Vote/Cast/5 — formularz głosowania
+        public ApplicationDbContext Context => _context;
+
+        public UserManager<IdentityUser> UserManager => _userManager;
+
+        //formularz oddania głosu
         public async Task<IActionResult> Cast(int id)
         {
-            var survey = await _context.Surveys
+            var survey = await Context.Surveys
                 .Include(s => s.Options)
                     .ThenInclude(o => o.Votes)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -37,9 +41,9 @@ namespace AnkietyPPK.Controllers
                 return RedirectToAction("Index", "Survey");
             }
 
-            var currentUserId = _userManager.GetUserId(User);
+            var currentUserId = UserManager.GetUserId(User);
 
-            // Sprawdzenie, czy użytkownik już głosował w tej ankiecie
+            //sprawdzenie, czy użytkownik już głosował w tej ankiecie
             var hasVoted = survey.Options
                 .Any(o => o.Votes.Any(v => v.RespondentUserId == currentUserId));
 
@@ -60,7 +64,7 @@ namespace AnkietyPPK.Controllers
             return View(viewModel);
         }
 
-        // POST: Vote/Cast — oddanie głosu
+        //oddanie głosu
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cast(VoteViewModel model)
@@ -70,7 +74,7 @@ namespace AnkietyPPK.Controllers
                 ModelState.AddModelError("SelectedOptionId", "Musisz wybrać jedną opcję.");
             }
 
-            var survey = await _context.Surveys
+            var survey = await Context.Surveys
                 .Include(s => s.Options)
                     .ThenInclude(o => o.Votes)
                 .FirstOrDefaultAsync(s => s.Id == model.SurveyId);
@@ -84,9 +88,9 @@ namespace AnkietyPPK.Controllers
                 return RedirectToAction("Index", "Survey");
             }
 
-            var currentUserId = _userManager.GetUserId(User)!;
+            var currentUserId = UserManager.GetUserId(User)!;
 
-            // Ponowna walidacja — czy użytkownik już głosował
+            //sprawdzenie, czy użytkownik już głosował w tej ankiecie
             var hasVoted = survey.Options
                 .Any(o => o.Votes.Any(v => v.RespondentUserId == currentUserId));
 
@@ -104,7 +108,7 @@ namespace AnkietyPPK.Controllers
                 return View(model);
             }
 
-            // Sprawdzenie, czy wybrana opcja należy do tej ankiety
+            //sprawdzenie, czy wybrana opcja należy do tej ankiety
             var selectedOption = survey.Options.FirstOrDefault(o => o.Id == model.SelectedOptionId);
             if (selectedOption == null)
             {
@@ -119,8 +123,8 @@ namespace AnkietyPPK.Controllers
                 VotedAt = DateTime.Now
             };
 
-            _context.Votes.Add(vote);
-            await _context.SaveChangesAsync();
+            Context.Votes.Add(vote);
+            await Context.SaveChangesAsync();
 
             TempData["Success"] = "Dziękujemy za oddanie głosu!";
             return RedirectToAction("Results", "Survey", new { id = model.SurveyId });

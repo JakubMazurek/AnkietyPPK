@@ -11,13 +11,13 @@ namespace AnkietyPPK.Models
         [Display(Name = "Treść opcji")]
         public string Text { get; set; } = string.Empty;
 
-        // Klucz obcy do ankiety
+        //klucz obcy do ankiety, do której należy ta opcja
         public int SurveyId { get; set; }
 
-        // Nawigacja do ankiety nadrzędnej
+        //nawigacja do ankiety
         public Survey Survey { get; set; } = null!;
 
-        // Relacja 1:N — jedna opcja ma wiele głosów
+        //relacja 1:N do głosów oddanych na tę opcję
         public ICollection<Vote> Votes { get; set; } = new List<Vote>();
     }
 }

@@ -9,7 +9,7 @@ namespace AnkietyPPK.Data
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-            // Tworzenie ról
+            //tworzenie ról
             string[] roles = { "Ankieter", "Respondent" };
 
             foreach (var role in roles)
@@ -20,7 +20,7 @@ namespace AnkietyPPK.Data
                 }
             }
 
-            // Tworzenie przykładowego ankietera
+            //tworzenie przykładowego ankietera
             var ankieterEmail = "ankieter@example.com";
             if (await userManager.FindByEmailAsync(ankieterEmail) == null)
             {
@@ -37,7 +37,7 @@ namespace AnkietyPPK.Data
                 }
             }
 
-            // Tworzenie przykładowego respondenta
+            //tworzenie przykładowego respondenta
             var respondentEmail = "respondent@example.com";
             if (await userManager.FindByEmailAsync(respondentEmail) == null)
             {

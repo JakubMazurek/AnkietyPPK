@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AnkietyPPK.Data;
+using AnkietyPPK.Models;
+using AnkietyPPK.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AnkietyPPK.Data;
-using AnkietyPPK.Models;
-using AnkietyPPK.Models.ViewModels;
 
 namespace AnkietyPPK.Controllers
 {
@@ -14,18 +14,22 @@ namespace AnkietyPPK.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
 
+        public ApplicationDbContext Context => _context;
+
+        public UserManager<IdentityUser> UserManager => _userManager;
+
         public SurveyController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
-        // GET: Survey — lista wszystkich ankiet
+        //zlistowanie ankiet
         public async Task<IActionResult> Index()
         {
-            var currentUserId = _userManager.GetUserId(User);
+            var currentUserId = UserManager.GetUserId(User);
 
-            var surveys = await _context.Surveys
+            var surveys = await Context.Surveys
                 .Include(s => s.Options)
                     .ThenInclude(o => o.Votes)
                 .OrderByDescending(s => s.CreatedAt)
@@ -46,18 +50,18 @@ namespace AnkietyPPK.Controllers
             return View(viewModel);
         }
 
-        // GET: Survey/Create — formularz tworzenia ankiety (tylko Ankieter)
+        //tworzenie ankiety - formularz
         [Authorize(Roles = "Ankieter")]
         public IActionResult Create()
         {
             var model = new CreateSurveyViewModel
             {
-                Options = new List<string> { "", "" } // minimum 2 opcje
+                Options = new List<string> { "", "" }
             };
             return View(model);
         }
 
-        // POST: Survey/Create — zapis nowej ankiety
+        //zapisywanie ankiety
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Ankieter")]
@@ -84,23 +88,23 @@ namespace AnkietyPPK.Controllers
             {
                 Title = model.Title,
                 Description = model.Description,
-                CreatedByUserId = _userManager.GetUserId(User)!,
+                CreatedByUserId = UserManager.GetUserId(User)!,
                 CreatedAt = DateTime.Now,
                 IsActive = true,
                 Options = model.Options.Select(text => new Option { Text = text }).ToList()
             };
 
-            _context.Surveys.Add(survey);
-            await _context.SaveChangesAsync();
+            Context.Surveys.Add(survey);
+            await Context.SaveChangesAsync();
 
             TempData["Success"] = "Ankieta została utworzona pomyślnie!";
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Survey/Results/5 — wyniki ankiety (wykres)
+        //wyniki ankiety
         public async Task<IActionResult> Results(int id)
         {
-            var survey = await _context.Surveys
+            var survey = await Context.Surveys
                 .Include(s => s.Options)
                     .ThenInclude(o => o.Votes)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -108,7 +112,7 @@ namespace AnkietyPPK.Controllers
             if (survey == null)
                 return NotFound();
 
-            var currentUserId = _userManager.GetUserId(User);
+            var currentUserId = UserManager.GetUserId(User);
             var totalVotes = survey.Options.Sum(o => o.Votes.Count);
 
             var viewModel = new SurveyResultsViewModel
@@ -130,11 +134,11 @@ namespace AnkietyPPK.Controllers
             return View(viewModel);
         }
 
-        // GET: Survey/Delete/5 — usuwanie ankiety (tylko Ankieter)
+        //usuwanie ankiety - potwierdzenie
         [Authorize(Roles = "Ankieter")]
         public async Task<IActionResult> Delete(int id)
         {
-            var survey = await _context.Surveys
+            var survey = await Context.Surveys
                 .Include(s => s.Options)
                     .ThenInclude(o => o.Votes)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -145,27 +149,27 @@ namespace AnkietyPPK.Controllers
             return View(survey);
         }
 
-        // POST: Survey/Delete/5
+        //potwierdzenie usunięcia ankiety
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Ankieter")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var survey = await _context.Surveys.FindAsync(id);
+            var survey = await Context.Surveys.FindAsync(id);
             if (survey != null)
             {
-                _context.Surveys.Remove(survey);
-                await _context.SaveChangesAsync();
+                Context.Surveys.Remove(survey);
+                await Context.SaveChangesAsync();
                 TempData["Success"] = "Ankieta została usunięta.";
             }
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Survey/Votes/5 — lista głosów (tylko Ankieter)
+        //zliczenie głosów - szczegóły
         [Authorize(Roles = "Ankieter")]
         public async Task<IActionResult> Votes(int id)
         {
-            var survey = await _context.Surveys
+            var survey = await Context.Surveys
                 .Include(s => s.Options)
                     .ThenInclude(o => o.Votes)
                 .FirstOrDefaultAsync(s => s.Id == id);
