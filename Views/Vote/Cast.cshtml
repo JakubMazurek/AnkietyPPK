@@ -1,0 +1,55 @@
+@model VoteViewModel
+@{
+    ViewData["Title"] = "Głosuj — " + Model.Title;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-check2-circle"></i> Oddaj głos</h4>
+            </div>
+            <div class="card-body">
+                <h3>@Model.Title</h3>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p class="text-muted">@Model.Description</p>
+                }
+
+                <hr />
+
+                <form asp-action="Cast" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="SurveyId" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <p class="fw-bold mb-3">Wybierz jedną opcję:</p>
+
+                    @foreach (var option in Model.Options)
+                    {
+                        <div class="form-check mb-3 p-3 border rounded">
+                            <input class="form-check-input" type="radio"
+                                   name="SelectedOptionId" value="@option.Id"
+                                   id="option_@option.Id" />
+                            <label class="form-check-label fs-5 ms-2" for="option_@option.Id">
+                                @option.Text
+                            </label>
+                        </div>
+                    }
+
+                    <span asp-validation-for="SelectedOptionId" class="text-danger d-block mb-3"></span>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-send"></i> Oddaj głos
+                        </button>
+                        <a asp-controller="Survey" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left"></i> Anuluj
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Rejestracja";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Rejestracja</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted text-center mb-3">
+                    Nowe konta otrzymują rolę <strong>Respondent</strong> (głosowanie i przeglądanie wyników).
+                </p>
+
+                <form asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" placeholder="twoj@email.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                        <div class="form-text">Min. 6 znaków, wielka litera, cyfra i znak specjalny.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 mb-3">
+                        <i class="bi bi-person-plus"></i> Zarejestruj się
+                    </button>
+
+                    <p class="text-center text-muted">
+                        Masz już konto?
+                        <a asp-action="Login">Zaloguj się</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

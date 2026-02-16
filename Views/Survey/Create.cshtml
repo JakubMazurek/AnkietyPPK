@@ -1,0 +1,106 @@
+@model CreateSurveyViewModel
+@{
+    ViewData["Title"] = "Nowa ankieta";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Utwórz nową ankietę</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post" id="surveyForm">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-bold"></label>
+                        <input asp-for="Title" class="form-control" placeholder="Wpisz tytuł ankiety..." />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-bold"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"
+                                  placeholder="Opcjonalny opis ankiety..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <hr />
+                    <h5 class="mb-3"><i class="bi bi-list-check"></i> Opcje odpowiedzi</h5>
+                    <p class="text-muted small">Dodaj co najmniej 2 opcje do wyboru.</p>
+
+                    <div id="optionsContainer">
+                        @for (int i = 0; i < Model.Options.Count; i++)
+                        {
+                            <div class="input-group mb-2 option-row">
+                                <span class="input-group-text">@(i + 1).</span>
+                                <input type="text" name="Options[@i]" value="@Model.Options[i]"
+                                       class="form-control" placeholder="Wpisz opcję..." />
+                                @if (i >= 2)
+                                {
+                                    <button type="button" class="btn btn-outline-danger btn-remove-option">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <span asp-validation-for="Options" class="text-danger"></span>
+
+                    <button type="button" id="btnAddOption" class="btn btn-outline-secondary btn-sm mb-4">
+                        <i class="bi bi-plus"></i> Dodaj opcję
+                    </button>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Utwórz ankietę
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Anuluj
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnAddOption').addEventListener('click', function () {
+            var container = document.getElementById('optionsContainer');
+            var rows = container.querySelectorAll('.option-row');
+            var index = rows.length;
+
+            var div = document.createElement('div');
+            div.className = 'input-group mb-2 option-row';
+            div.innerHTML =
+                '<span class="input-group-text">' + (index + 1) + '.</span>' +
+                '<input type="text" name="Options[' + index + ']" class="form-control" placeholder="Wpisz opcję..." />' +
+                '<button type="button" class="btn btn-outline-danger btn-remove-option"><i class="bi bi-x-lg"></i></button>';
+
+            container.appendChild(div);
+            renumberOptions();
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.btn-remove-option')) {
+                var row = e.target.closest('.option-row');
+                row.remove();
+                renumberOptions();
+            }
+        });
+
+        function renumberOptions() {
+            var rows = document.querySelectorAll('#optionsContainer .option-row');
+            rows.forEach(function (row, i) {
+                row.querySelector('.input-group-text').textContent = (i + 1) + '.';
+                row.querySelector('input').name = 'Options[' + i + ']';
+            });
+        }
+    </script>
+}

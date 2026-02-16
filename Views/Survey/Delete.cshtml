@@ -1,0 +1,42 @@
+@model Survey
+@{
+    ViewData["Title"] = "Usuń ankietę";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-trash"></i> Potwierdź usunięcie</h4>
+            </div>
+            <div class="card-body">
+                <p>Czy na pewno chcesz usunąć ankietę?</p>
+                <h5>@Model.Title</h5>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p class="text-muted">@Model.Description</p>
+                }
+                <p class="text-muted small">
+                    Opcji: @Model.Options.Count |
+                    Głosów: @Model.Options.Sum(o => o.Votes.Count)
+                </p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Ta operacja usunie ankietę wraz ze wszystkimi opcjami i głosami. Nie można jej cofnąć.
+                </div>
+                <form asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Usuń
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Anuluj
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

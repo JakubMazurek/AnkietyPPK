@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Strona główna";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 fw-bold text-dark mb-3">
+            <i class="bi bi-clipboard2-data text-primary"></i><br />
+            Ankiety Online
+        </h1>
+        <p class="lead text-muted mb-4">
+            Twórz ankiety, zbieraj odpowiedzi i przeglądaj wyniki w formie wykresów.
+        </p>
+
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            <a asp-controller="Survey" asp-action="Index" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-list-task"></i> Przeglądaj ankiety
+            </a>
+            @if (User.IsInRole("Ankieter"))
+            {
+                <a asp-controller="Survey" asp-action="Create" class="btn btn-success btn-lg">
+                    <i class="bi bi-plus-circle"></i> Utwórz ankietę
+                </a>
+            }
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
+            </a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-person-plus"></i> Zarejestruj się
+            </a>
+        }
+    </div>
+</div>
+
+<div class="row mt-5 g-4">
+    <div class="col-md-4">
+        <div class="card text-center p-4 h-100">
+            <div class="card-body">
+                <i class="bi bi-pencil-square display-4 text-primary"></i>
+                <h5 class="mt-3">Twórz ankiety</h5>
+                <p class="text-muted">Ankieterzy mogą szybko tworzyć ankiety z wieloma opcjami odpowiedzi.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center p-4 h-100">
+            <div class="card-body">
+                <i class="bi bi-check2-circle display-4 text-success"></i>
+                <h5 class="mt-3">Głosuj</h5>
+                <p class="text-muted">Respondenci mogą oddawać głosy — każdy użytkownik tylko raz na ankietę.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center p-4 h-100">
+            <div class="card-body">
+                <i class="bi bi-bar-chart-line display-4 text-info"></i>
+                <h5 class="mt-3">Wyniki</h5>
+                <p class="text-muted">Przeglądaj statystyki i wykresy słupkowe po oddaniu głosu.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-5 p-4">
+    <h5 class="mb-3"><i class="bi bi-info-circle"></i> Konta testowe</h5>
+    <div class="row">
+        <div class="col-md-6">
+            <p class="mb-1"><strong>Ankieter:</strong></p>
+            <code>ankieter@example.com</code> / <code>Ankieter123!</code>
+        </div>
+        <div class="col-md-6">
+            <p class="mb-1"><strong>Respondent:</strong></p>
+            <code>respondent@example.com</code> / <code>Respondent123!</code>
+        </div>
+    </div>
+</div>

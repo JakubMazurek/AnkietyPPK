@@ -1,0 +1,127 @@
+@model SurveyResultsViewModel
+@{
+    ViewData["Title"] = "Wyniki — " + Model.Title;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="bi bi-bar-chart-line"></i> Wyniki ankiety</h4>
+            </div>
+            <div class="card-body">
+                <h3>@Model.Title</h3>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p class="text-muted">@Model.Description</p>
+                }
+
+                <p class="mb-4">
+                    <span class="badge bg-dark fs-6">
+                        <i class="bi bi-people"></i> Łączna liczba głosów: @Model.TotalVotes
+                    </span>
+                </p>
+
+                @if (Model.TotalVotes == 0)
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Brak głosów w tej ankiecie.
+                    </div>
+                }
+                else
+                {
+                    @* Wykres słupkowy (CSS) *@
+                    <div class="mb-4">
+                        @foreach (var option in Model.Options.OrderByDescending(o => o.VoteCount))
+                        {
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <strong>@option.Text</strong>
+                                    <span class="text-muted">@option.VoteCount głosów (@option.Percentage%)</span>
+                                </div>
+                                <div class="progress" style="height: 30px;">
+                                    <div class="progress-bar bar-chart-bar" role="progressbar"
+                                         style="width: @option.Percentage%"
+                                         aria-valuenow="@option.Percentage"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        @if (option.Percentage >= 10)
+                                        {
+                                            @($"{option.Percentage}%")
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    @* Wykres słupkowy (Canvas) *@
+                    <h5 class="mt-5 mb-3"><i class="bi bi-bar-chart"></i> Wykres</h5>
+                    <canvas id="resultsChart" height="120"></canvas>
+                }
+
+                <div class="mt-4 d-flex gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Wróć do listy
+                    </a>
+                    @if (!Model.HasVoted && !User.IsInRole("Ankieter"))
+                    {
+                        <a asp-controller="Vote" asp-action="Cast" asp-route-id="@Model.SurveyId"
+                           class="btn btn-primary">
+                            <i class="bi bi-check2-circle"></i> Głosuj
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @if (Model.TotalVotes > 0)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+        <script>
+            var ctx = document.getElementById('resultsChart').getContext('2d');
+
+            var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Options.Select(o => o.Text)));
+            var data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Options.Select(o => o.VoteCount)));
+
+            var backgroundColors = [
+                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                '#858796', '#5a5c69', '#2e59d9', '#17a673', '#2c9faf'
+            ];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Liczba głosów',
+                        data: data,
+                        backgroundColor: backgroundColors.slice(0, data.length),
+                        borderColor: backgroundColors.slice(0, data.length),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, precision: 0 },
+                            title: { display: true, text: 'Liczba głosów' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Opcje' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        </script>
+    }
+}
